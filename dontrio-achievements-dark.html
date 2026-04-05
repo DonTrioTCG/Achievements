@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DonTrio — Achievements</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:#e3000b; --red-dim:#8a0007; --gold:#f5c518;
+    --bg:#0a0a0c; --bg2:#111116; --bg3:#1a1a22;
+    --border:rgba(227,0,11,0.25); --text:#e8e8f0; --muted:#6b6b80;
+    --earned:#1a2a1a; --earned-border:rgba(80,200,80,0.4); --earned-text:#6dda6d;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    min-height:100vh; overflow-x:hidden;
+  }
+
+  body::before {
+    content:''; position:fixed; inset:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+    pointer-events:none; z-index:999;
+  }
+
+  .bg-grid {
+    position:fixed; inset:0;
+    background-image:linear-gradient(rgba(227,0,11,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(227,0,11,0.04) 1px,transparent 1px);
+    background-size:40px 40px;
+    animation:gridDrift 20s linear infinite; pointer-events:none;
+  }
+
+  @keyframes gridDrift { 0%{transform:translate(0,0)} 100%{transform:translate(40px,40px)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* ── HEADER ── */
+  header {
+    position:relative; padding:60px 40px 40px; text-align:center;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(227,0,11,0.08) 0%,transparent 100%);
+  }
+
+  .logo-eyebrow { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:6px; color:var(--red); text-transform:uppercase; margin-bottom:12px; opacity:0; animation:fadeUp .6s .2s forwards; }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:clamp(64px,12vw,120px); line-height:.9; letter-spacing:4px; background:linear-gradient(180deg,#fff 0%,#ccc 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; opacity:0; animation:fadeUp .6s .35s forwards; }
+  .logo span { background:linear-gradient(180deg,var(--red) 0%,var(--red-dim) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .logo-sub { font-family:'Bebas Neue',sans-serif; font-size:clamp(18px,4vw,28px); letter-spacing:12px; color:var(--muted); margin-top:8px; opacity:0; animation:fadeUp .6s .5s forwards; }
+  .header-line { width:120px; height:2px; background:linear-gradient(90deg,transparent,var(--red),transparent); margin:24px auto 0; opacity:0; animation:fadeUp .6s .65s forwards; }
+
+  /* ── STATS BAR ── */
+  .stats-bar { display:flex; justify-content:center; gap:60px; padding:28px 40px; border-bottom:1px solid var(--border); background:var(--bg2); flex-wrap:wrap; }
+  .stat { text-align:center; }
+  .stat-number { font-family:'Bebas Neue',sans-serif; font-size:42px; color:var(--red); line-height:1; }
+  .stat-label { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-top:4px; }
+
+  /* ── LOADING ── */
+  #loading {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:100px 40px; gap:20px;
+  }
+
+  .spinner {
+    width:40px; height:40px; border-radius:50%;
+    border:3px solid rgba(227,0,11,0.2);
+    border-top-color:var(--red);
+    animation:spin 0.8s linear infinite;
+  }
+
+  .loading-text { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:4px; color:var(--muted); text-transform:uppercase; }
+
+  /* ── ERROR ── */
+  #error-msg { display:none; text-align:center; padding:60px 40px; }
+  .error-text { font-family:'Share Tech Mono',monospace; font-size:12px; letter-spacing:3px; color:var(--red); text-transform:uppercase; }
+
+  /* ── MAIN ── */
+  main { max-width:1200px; margin:0 auto; padding:50px 24px 80px; display:none; }
+
+  /* ── SECTION HEADERS ── */
+  .section-header { display:flex; align-items:center; gap:16px; margin-bottom:28px; margin-top:56px; }
+  .section-header:first-of-type { margin-top:0; }
+  .section-tag { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:4px; color:var(--red); background:rgba(227,0,11,0.1); border:1px solid var(--border); padding:4px 10px; text-transform:uppercase; }
+  .section-line { flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px; color:var(--text); margin-bottom:6px; }
+
+  /* ── VIEWER SEARCH ── */
+  .viewer-bar { background:var(--bg2); border:1px solid var(--border); padding:20px 24px; margin-bottom:40px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .viewer-label { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; white-space:nowrap; }
+  .viewer-input { flex:1; min-width:200px; background:var(--bg3); border:1px solid var(--border); color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px; padding:10px 14px; outline:none; transition:border-color .2s; }
+  .viewer-input:focus { border-color:var(--red); }
+  .viewer-input::placeholder { color:var(--muted); }
+  .viewer-btn { background:var(--red); color:white; border:none; font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; padding:10px 24px; cursor:pointer; transition:background .2s; white-space:nowrap; }
+  .viewer-btn:hover { background:#ff1a24; }
+
+  /* ── LEADERBOARD ── */
+  .leaderboard { display:flex; flex-direction:column; gap:10px; }
+  .lb-row { display:flex; align-items:center; gap:16px; background:var(--bg2); border:1px solid var(--border); padding:14px 20px; position:relative; overflow:hidden; transition:all .2s; }
+  .lb-row:hover { border-color:rgba(227,0,11,0.5); background:var(--bg3); }
+  .lb-row.top-1 { border-color:rgba(245,197,24,0.5); }
+  .lb-row.top-2 { border-color:rgba(192,192,192,0.4); }
+  .lb-row.top-3 { border-color:rgba(205,127,50,0.4); }
+  .lb-bar { position:absolute; left:0; top:0; bottom:0; background:rgba(227,0,11,0.06); pointer-events:none; }
+  .lb-row.top-1 .lb-bar { background:rgba(245,197,24,0.08); }
+  .lb-rank { font-family:'Bebas Neue',sans-serif; font-size:26px; width:44px; text-align:center; position:relative; z-index:1; flex-shrink:0; color:var(--muted); }
+  .lb-row.top-1 .lb-rank { color:var(--gold); }
+  .lb-row.top-2 .lb-rank { color:#c0c0c0; }
+  .lb-row.top-3 .lb-rank { color:#cd7f32; }
+  .lb-name { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px; position:relative; z-index:1; flex:1; }
+  .lb-badges { display:flex; gap:4px; position:relative; z-index:1; flex-wrap:wrap; }
+  .lb-badge { font-size:14px; }
+  .lb-count { position:relative; z-index:1; text-align:right; white-space:nowrap; }
+  .lb-count strong { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--red); display:block; line-height:1; }
+  .lb-count span { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; }
+
+  /* ── ACHIEVEMENT GRID ── */
+  .achievement-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+  .ach-card { background:var(--bg2); border:1px solid var(--border); padding:20px; position:relative; transition:all .2s; cursor:pointer; overflow:hidden; }
+  .ach-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--red),transparent); opacity:0; transition:opacity .2s; }
+  .ach-card:hover { border-color:var(--red); background:var(--bg3); transform:translateY(-2px); box-shadow:0 8px 30px rgba(227,0,11,0.15); }
+  .ach-card:hover::before { opacity:1; }
+  .ach-card.earned { background:var(--earned); border-color:var(--earned-border); }
+  .ach-card.earned::before { background:linear-gradient(90deg,transparent,var(--earned-text),transparent); opacity:1; }
+  .ach-icon { font-size:28px; margin-bottom:10px; display:block; }
+  .ach-name { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px; color:var(--text); margin-bottom:6px; }
+  .ach-card.earned .ach-name { color:var(--earned-text); }
+  .ach-desc { font-size:13px; color:var(--muted); line-height:1.5; font-weight:500; margin-bottom:10px; }
+  .ach-footer { display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); }
+  .ach-unlocked { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--muted); }
+  .ach-unlocked span { color:var(--red); }
+  .ach-click-hint { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(255,255,255,0.18); letter-spacing:1px; }
+  .earned-badge { position:absolute; top:14px; right:14px; font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--earned-text); background:rgba(80,200,80,0.1); border:1px solid var(--earned-border); padding:3px 7px; text-transform:uppercase; }
+
+  /* ── GYM GRID ── */
+  .gym-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; }
+  .gym-card { background:var(--bg2); border:1px solid var(--border); padding:16px; text-align:center; transition:all .2s; }
+  .gym-card.beaten { background:var(--earned); border-color:var(--earned-border); }
+  .gym-card:hover { border-color:rgba(227,0,11,0.5); transform:translateY(-2px); }
+  .gym-badge-icon { font-size:32px; margin-bottom:8px; display:block; filter:grayscale(1) opacity(.35); transition:filter .3s; }
+  .gym-card.beaten .gym-badge-icon { filter:none; }
+  .gym-set { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; }
+  .gym-name { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1px; color:var(--text); }
+  .gym-card.beaten .gym-name { color:var(--earned-text); }
+  .gym-sub-label { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:14px; margin-top:28px; }
+
+  /* ── COMMUNAL ── */
+  .communal-card { background:var(--bg2); border:1px solid var(--border); padding:24px 28px; margin-bottom:16px; position:relative; overflow:hidden; }
+  .communal-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:10px; flex-wrap:wrap; }
+  .communal-name { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; margin-bottom:4px; }
+  .communal-desc { font-size:13px; color:var(--muted); font-weight:500; margin-bottom:16px; }
+  .communal-pct { font-family:'Bebas Neue',sans-serif; font-size:38px; color:var(--red); line-height:1; white-space:nowrap; }
+  .progress-bar { height:6px; background:rgba(255,255,255,0.06); position:relative; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--red-dim),var(--red)); position:relative; }
+  .progress-fill::after { content:''; position:absolute; right:0; top:0; bottom:0; width:20px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.3)); animation:shimmer 1.5s ease-in-out infinite; }
+  @keyframes shimmer { 0%,100%{opacity:0} 50%{opacity:1} }
+  .progress-meta { display:flex; justify-content:space-between; margin-top:8px; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .2s; backdrop-filter:blur(6px); }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--bg2); border:1px solid var(--border); max-width:500px; width:100%; position:relative; transform:translateY(24px); transition:transform .25s; }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-top-bar { height:3px; background:linear-gradient(90deg,var(--red-dim),var(--red),var(--red-dim)); }
+  .modal-body { padding:30px; }
+  .modal-icon { font-size:48px; margin-bottom:10px; display:block; }
+  .modal-rarity { display:inline-block; font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:3px; padding:3px 10px; text-transform:uppercase; margin-bottom:12px; }
+  .rarity-rare { color:var(--gold); border:1px solid rgba(245,197,24,0.3); background:rgba(245,197,24,0.06); }
+  .rarity-common { color:#6b9fff; border:1px solid rgba(107,159,255,0.3); background:rgba(107,159,255,0.05); }
+  .modal-name { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:2px; color:var(--text); margin-bottom:8px; }
+  .modal-desc { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:24px; font-weight:500; }
+  .modal-stats { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:22px; }
+  .modal-stat { background:var(--bg3); padding:18px; text-align:center; }
+  .modal-stat-num { font-family:'Bebas Neue',sans-serif; font-size:38px; color:var(--red); line-height:1; }
+  .modal-stat-label { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-top:4px; }
+  .modal-earners-title { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+  .modal-earners { display:flex; flex-wrap:wrap; gap:8px; }
+  .modal-earner-tag { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--earned-text); background:rgba(80,200,80,0.1); border:1px solid var(--earned-border); padding:4px 10px; }
+  .modal-none { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted); }
+  .modal-close { position:absolute; top:16px; right:16px; background:none; border:1px solid var(--border); color:var(--muted); font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:2px; padding:6px 14px; cursor:pointer; transition:all .2s; text-transform:uppercase; }
+  .modal-close:hover { border-color:var(--red); color:var(--red); }
+
+  /* ── LAST UPDATED ── */
+  .last-updated { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-align:center; margin-top:40px; }
+  .last-updated a { color:var(--red); text-decoration:none; }
+
+  footer { border-top:1px solid var(--border); padding:30px 40px; text-align:center; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+  footer a { color:var(--red); text-decoration:none; }
+
+  @media(max-width:600px) { header{padding:40px 20px 30px} .stats-bar{gap:30px;padding:20px} main{padding:30px 16px 60px} }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <div class="logo-eyebrow">Twitch Stream Achievements</div>
+  <div class="logo">Don<span>Trio</span></div>
+  <div class="logo-sub">Achievement Tracker</div>
+  <div class="header-line"></div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-number" id="s-total">—</div><div class="stat-label">Achievements</div></div>
+  <div class="stat"><div class="stat-number" id="s-viewers">—</div><div class="stat-label">Active Viewers</div></div>
+  <div class="stat"><div class="stat-number" id="s-earned">—</div><div class="stat-label">Total Earned</div></div>
+</div>
+
+<!-- Loading state -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading achievement data...</div>
+</div>
+
+<!-- Error state -->
+<div id="error-msg">
+  <div class="error-text">Could not load data — check your connection and try again</div>
+</div>
+
+<!-- Main content (hidden until data loads) -->
+<main id="main-content">
+
+  <div class="viewer-bar">
+    <span class="viewer-label">Find Viewer</span>
+    <input class="viewer-input" type="text" id="vsearch" placeholder="Skriv dit Twitch-navn...">
+    <button class="viewer-btn" onclick="filterViewer()">Søg</button>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="section-header">
+    <div><div class="section-title">Top Achievement Hunters</div></div>
+    <div class="section-line"></div>
+    <div class="section-tag">Leaderboard</div>
+  </div>
+  <div class="leaderboard" id="leaderboard"></div>
+
+  <!-- Individual achievements -->
+  <div class="section-header">
+    <div><div class="section-title">Individuelle Achievements</div></div>
+    <div class="section-line"></div>
+    <div class="section-tag">Individual</div>
+  </div>
+  <div class="achievement-grid" id="ach-grid"></div>
+
+  <!-- Gym leaders -->
+  <div class="section-header">
+    <div><div class="section-title">Gym Leader Progress</div></div>
+    <div class="section-line"></div>
+    <div class="section-tag">Badges</div>
+  </div>
+  <div class="gym-sub-label">⚔ Scarlet &amp; Violet</div>
+  <div class="gym-grid" id="gym-sv"></div>
+  <div class="gym-sub-label">⚔ Mega Evolution</div>
+  <div class="gym-grid" id="gym-me"></div>
+
+  <!-- Communal -->
+  <div class="section-header">
+    <div><div class="section-title">Fælles Achievements</div></div>
+    <div class="section-line"></div>
+    <div class="section-tag">Communal</div>
+  </div>
+  <div class="communal-card">
+    <div class="communal-top"><div class="communal-name">🤝 Fælles Front</div><div class="communal-pct" id="cp1-pct">0%</div></div>
+    <div class="communal-desc">Chatten åbner tilsammen 100 packs på én måned</div>
+    <div class="progress-bar"><div class="progress-fill" id="cp1-bar" style="width:0%"></div></div>
+    <div class="progress-meta"><span id="cp1-meta">0 / 100 packs</span><span>Denne måned</span></div>
+  </div>
+  <div class="communal-card">
+    <div class="communal-top"><div class="communal-name">⚡ Holdet Samler</div><div class="communal-pct" id="cp2-pct">0%</div></div>
+    <div class="communal-desc">10 viewers rammer et EX-kort samme måned</div>
+    <div class="progress-bar"><div class="progress-fill" id="cp2-bar" style="width:0%"></div></div>
+    <div class="progress-meta"><span id="cp2-meta">0 / 10 viewers</span><span>Denne måned</span></div>
+  </div>
+  <div class="communal-card">
+    <div class="communal-top"><div class="communal-name">🏆 Ingen Tilbage</div><div class="communal-pct" id="cp3-pct">0%</div></div>
+    <div class="communal-desc">Alle aktive viewers tjener mindst ét achievement i en sæson</div>
+    <div class="progress-bar"><div class="progress-fill" id="cp3-bar" style="width:0%"></div></div>
+    <div class="progress-meta"><span id="cp3-meta">0 / 0 viewers</span><span>Denne sæson</span></div>
+  </div>
+
+  <div class="last-updated" id="last-updated"></div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-top-bar"></div>
+    <button class="modal-close" onclick="closeModalDirect()">× Luk</button>
+    <div class="modal-body">
+      <span class="modal-icon" id="m-icon">🏆</span>
+      <div class="modal-rarity" id="m-rarity"></div>
+      <div class="modal-name" id="m-name"></div>
+      <div class="modal-desc" id="m-desc"></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-num" id="m-count">0</div><div class="modal-stat-label">Viewers Unlocked</div></div>
+        <div class="modal-stat"><div class="modal-stat-num" id="m-pct">0%</div><div class="modal-stat-label">Af Aktive Viewers</div></div>
+      </div>
+      <div class="modal-earners-title">Unlocked af</div>
+      <div class="modal-earners" id="m-earners"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>DonTrio Achievement Tracker &nbsp;·&nbsp; Opdateres efter hver stream &nbsp;·&nbsp; <a href="https://twitch.tv/DonTrio_TCG" target="_blank">twitch.tv/DonTrio_TCG</a></div>
+</footer>
+
+<script>
+  // ══════════════════════════════════════════════════════════════
+  // 🔧 CONFIGURATION — replace this URL with your own Web App URL
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzrTXW7pe7uKpdH0Iepup7cCx6UcVcT6fcxx2C8iWM5C2uDWrMOCAIuNV2e6nv4aRZrIQ/exec';
+  // ══════════════════════════════════════════════════════════════
+
+  // Achievement icons — mapped by column title keywords
+  const ICON_MAP = {
+    'ex': '⚡', 'illustration': '🎨', 'sir': '👑', 'pink': '💗',
+    'kaching': '💰', 'hyper': '💰', 'godt': '🎁', 'mystery': '🃏',
+    'bullseye': '🎯', 'sniper': '🔫', 'robin': '🏹', 'godpack': '✨',
+    'dagens pull': '🏆', 'king': '⛰️', 'winner': '🥇', 'champion': '🏅',
+    'challenger': '⚔️', 'trainer': '🌟', 'rematch': '🔄', 'ubesejret': '🛡️',
+    'første': '🩸', 'trofast': '🔥', "alti'": '💎', 'gavmild': '🎀',
+    'sub': '📺', 'beat': '🏅', 'scarlet': '🔴', 'mega': '⚡',
+    'paldea': '🌿', 'obsidian': '🔥', '151': '🌀', 'paradox': '🌌',
+    'temporal': '⏳', 'twilight': '🌙', 'shrouded': '🌫️', 'stellar': '⭐',
+    'surging': '🌊', 'prismatic': '💎', 'journey': '🗺️', 'destined': '⚔️',
+    'phantasmal': '👻', 'ascended': '👼', 'perfect': '✅', 'black': '⬛',
+    'white': '⬜', 'david': '🪨'
+  };
+
+  function getIcon(title) {
+    const lower = title.toLowerCase();
+    for (const [key, icon] of Object.entries(ICON_MAP)) {
+      if (lower.includes(key)) return icon;
+    }
+    return '🏆';
+  }
+
+  // Gym leader sets
+  const GYM_SV = [
+    {set:'Base Set',name:'S&V Base'},{set:'Paldea Evolved',name:'Gym Leader'},
+    {set:'Obsidian Flames',name:'Gym Leader'},{set:'151',name:'Gym Leader'},
+    {set:'Paradox Rift',name:'Gym Leader'},{set:'Paldean Fates',name:'Gym Leader'},
+    {set:'Temporal Forces',name:'Gym Leader'},{set:'Twilight Masquerade',name:'Gym Leader'},
+    {set:'Shrouded Fable',name:'Gym Leader'},{set:'Stellar Crown',name:'Gym Leader'},
+    {set:'Surging Sparks',name:'Gym Leader'},{set:'Prismatic Evolutions',name:'Gym Leader'},
+    {set:'Journey Together',name:'Gym Leader'},{set:'Destined Rivals',name:'Gym Leader'},
+  ];
+
+  const GYM_ME = [
+    {set:'Base Set',name:'Mega Evo Base'},{set:'Phantasmal Flames',name:'Gym Leader'},
+    {set:'Ascended Heroes',name:'Gym Leader'},{set:'Perfect Order',name:'Gym Leader'},
+    {set:'Black Bolt',name:'Gym Leader'},{set:'White Flare',name:'Gym Leader'},
+  ];
+
+  // State
+  let allAchievements = [];
+  let allViewers = [];
+  let currentViewer = null;
+  let totalViewers = 0;
+
+  // ── FETCH DATA ─────────────────────────────────────────────────
+  async function loadData() {
+    // Check if URL has been configured
+    if (SHEET_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+) {
+      useDummyData();
+      return;
+    }
+
+    try {
+      const res = await fetch(SHEET_URL + '?action=getAllData');
+      const data = await res.json();
+
+      if (data.status !== 'ok') throw new Error('Bad response');
+
+      allAchievements = data.achievements;
+      allViewers = data.viewers;
+      totalViewers = allViewers.length;
+
+      renderAll();
+    } catch(err) {
+      console.error('Failed to load sheet data:', err);
+      // Fall back to dummy data so page still works
+      useDummyData();
+    }
+  }
+
+  // ── DUMMY DATA (used until URL is configured) ──────────────────
+  function useDummyData() {
+    allAchievements = [
+      {col:4,  title:'Ex-ceptionelt!',  desc:'Hit et EX-kort under en pack opening'},
+      {col:5,  title:'Wow den er flot!', desc:'Hit en Illustration Rare'},
+      {col:6,  title:'Yes-SIR!',         desc:'Hit en Special Illustration Rare'},
+      {col:7,  title:'Pink Star!',        desc:'Hit en Ace-Spec Rare (pink star)'},
+      {col:8,  title:'KACHING!',          desc:'Hit en Hyper Rare eller MHR'},
+      {col:9,  title:'Godt valgt!',       desc:'Ram "godpack" i Mystery Envelope'},
+      {col:10, title:'Mystery Jackpot!',  desc:'Hit SIR eller sjældnere fra Mystery Envelope'},
+      {col:11, title:'Bullseye!',         desc:'Hit dagens Bullseye'},
+      {col:12, title:'Sniper!',           desc:'Hit dagens Bullseye to gange'},
+      {col:13, title:'Robin Hood!',       desc:'Hit dagens Bullseye tre gange'},
+      {col:14, title:'Godpack!',          desc:'Hit en godpack eller demi-godpack'},
+      {col:15, title:'Dagens pull!',      desc:'Vind dagens top pull'},
+      {col:16, title:'King-of-the-hill!', desc:'Vind en 8-mands turnering'},
+      {col:17, title:'Winner-winner!',    desc:'Vind en 16-mands turnering'},
+      {col:18, title:'Battle Champion!',  desc:'Vind en Champion Pin (top ved månedsskifte)'},
+      {col:19, title:'Challenger!',       desc:'Udfordre en Gym Leader'},
+      {col:20, title:'Trainer!',          desc:'Besejr en Gym Leader'},
+      {col:21, title:'Rematch!',          desc:'Udfordre en Gym Leader igen efter et nederlag'},
+      {col:22, title:'Ubesejret!',        desc:'Vind 3 Gym Leader battles i træk uden tab'},
+      {col:23, title:'Første Blod!',      desc:'Vær den første til at tjene et bestemt achievement'},
+      {col:24, title:'Trofast!',          desc:'Se 10 streams i træk'},
+      {col:25, title:"Alti'-alti'",       desc:'Se 25 streams i træk'},
+      {col:26, title:'Gavmild!',          desc:'Gift en sub i chatten'},
+      {col:27, title:'Sup Sub!',          desc:'Vær subbed til DonTrio i min. 1 måned'},
+    ];
+
+    allViewers = [
+      {name:'PokéPeter',   bullseyes:3, tournaments:2, earned:[4,5,6,8,11,12,13,15,16,17,19,20,22,23,24,25,26,27]},
+      {name:'CardKing',    bullseyes:2, tournaments:1, earned:[4,5,6,7,11,12,15,19,20,23,24,25,27]},
+      {name:'DanishDragon',bullseyes:1, tournaments:0, earned:[4,5,7,11,15,19,20,21,23,24,26]},
+      {name:'NordicNinja', bullseyes:0, tournaments:0, earned:[4,5,6,9,19,20,24,26,27]},
+      {name:'BoltBoy',     bullseyes:2, tournaments:0, earned:[4,5,8,11,12,19,20,24,27]},
+      {name:'TrainerTim',  bullseyes:1, tournaments:0, earned:[8,11,15,19,21,24,27]},
+      {name:'PokeProf',    bullseyes:1, tournaments:0, earned:[8,11,19,27]},
+      {name:'SilverSword', bullseyes:0, tournaments:0, earned:[9,11,27]},
+      {name:'RetroRaider', bullseyes:0, tournaments:0, earned:[11]},
+      {name:'PikaPower',   bullseyes:0, tournaments:0, earned:[4]},
+    ];
+
+    totalViewers = allViewers.length;
+    renderAll();
+  }
+
+  // ── RENDER ALL ─────────────────────────────────────────────────
+  function renderAll() {
+    // Stats bar
+    document.getElementById('s-total').textContent = allAchievements.length;
+    document.getElementById('s-viewers').textContent = totalViewers;
+    const totalEarned = allViewers.reduce((sum, v) => sum + v.earned.length, 0);
+    document.getElementById('s-earned').textContent = totalEarned;
+
+    // Communal progress (calculated from viewer data)
+    const viewersWithAch = allViewers.filter(v => v.earned.length > 0).length;
+    const pct3 = totalViewers > 0 ? Math.round(viewersWithAch / totalViewers * 100) : 0;
+    document.getElementById('cp3-pct').textContent = pct3 + '%';
+    document.getElementById('cp3-bar').style.width = pct3 + '%';
+    document.getElementById('cp3-meta').textContent = viewersWithAch + ' / ' + totalViewers + ' viewers';
+
+    // Last updated
+    document.getElementById('last-updated').textContent = 'Sidst opdateret: ' + new Date().toLocaleDateString('da-DK', {day:'numeric',month:'long',year:'numeric'});
+
+    buildLeaderboard();
+    buildGrid(null);
+    buildGym(GYM_SV, 'gym-sv');
+    buildGym(GYM_ME, 'gym-me');
+
+    // Show main content
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+  }
+
+  // ── LEADERBOARD ────────────────────────────────────────────────
+  function buildLeaderboard() {
+    const sorted = [...allViewers].sort((a,b) => b.earned.length - a.earned.length).slice(0,10);
+    const max = sorted[0]?.earned.length || 1;
+    const medals = ['🥇','🥈','🥉'];
+
+    document.getElementById('leaderboard').innerHTML = sorted.map(([v,i] = [null,0], idx) => {
+      // Handle both array destructuring and direct access
+      const viewer = sorted[idx];
+      const count = viewer.earned.length;
+      const icons = viewer.earned.slice(0,5).map(col => {
+        const ach = allAchievements.find(a => a.col === col);
+        return ach ? getIcon(ach.title) : '🏆';
+      }).join('');
+      const cls = idx===0?'top-1':idx===1?'top-2':idx===2?'top-3':'';
+      return `<div class="lb-row ${cls}">
+        <div class="lb-bar" style="width:${count/max*100}%"></div>
+        <div class="lb-rank">${idx<3?medals[idx]:'#'+(idx+1)}</div>
+        <div class="lb-name">${viewer.name}</div>
+        <div class="lb-badges">${icons}</div>
+        <div class="lb-count"><strong>${count}</strong><span>${count} / ${allAchievements.length} achievements</span></div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── ACHIEVEMENT GRID ───────────────────────────────────────────
+  function buildGrid(viewerName) {
+    const viewer = viewerName ? allViewers.find(v => v.name.toLowerCase() === viewerName.toLowerCase()) : null;
+
+    document.getElementById('ach-grid').innerHTML = allAchievements.map(ach => {
+      const earned = viewer ? viewer.earned.includes(ach.col) : false;
+      const earners = allViewers.filter(v => v.earned.includes(ach.col));
+      const count = earners.length;
+      const pct = totalViewers > 0 ? Math.round(count / totalViewers * 100) : 0;
+      const icon = getIcon(ach.title);
+
+      return `<div class="ach-card ${earned?'earned':''}" onclick="openModal(${ach.col})">
+        ${earned?'<div class="earned-badge">✓ Earned</div>':''}
+        <span class="ach-icon">${icon}</span>
+        <div class="ach-name">${ach.title}</div>
+        <div class="ach-desc">${ach.desc}</div>
+        <div class="ach-footer">
+          <div class="ach-unlocked"><span>${count}</span> viewer${count!==1?'s':''} · ${pct}%</div>
+          <div class="ach-click-hint">[ klik for detaljer ]</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── GYM GRID ──────────────────────────────────────────────────
+  function buildGym(data, id) {
+    document.getElementById(id).innerHTML = data.map(g =>
+      `<div class="gym-card">
+        <span class="gym-badge-icon">🏅</span>
+        <div class="gym-set">${g.set}</div>
+        <div class="gym-name">${g.name}</div>
+      </div>`
+    ).join('');
+  }
+
+  // ── MODAL ──────────────────────────────────────────────────────
+  function openModal(col) {
+    const ach = allAchievements.find(a => a.col === col);
+    if (!ach) return;
+
+    const earners = allViewers.filter(v => v.earned.includes(col));
+    const count = earners.length;
+    const pct = totalViewers > 0 ? Math.round(count / totalViewers * 100) : 0;
+    const icon = getIcon(ach.title);
+
+    document.getElementById('m-icon').textContent = icon;
+    document.getElementById('m-name').textContent = ach.title;
+    document.getElementById('m-desc').textContent = ach.desc;
+    document.getElementById('m-count').textContent = count;
+    document.getElementById('m-pct').textContent = pct + '%';
+
+    const rEl = document.getElementById('m-rarity');
+    if (count === 0) { rEl.textContent = '🔒 Ingen har unlocket dette'; rEl.className = 'modal-rarity rarity-rare'; }
+    else if (count <= 2) { rEl.textContent = '⭐ Ultra Sjælden'; rEl.className = 'modal-rarity rarity-rare'; }
+    else { rEl.textContent = 'Achievement'; rEl.className = 'modal-rarity rarity-common'; }
+
+    document.getElementById('m-earners').innerHTML = count === 0
+      ? '<span class="modal-none">Ingen viewer har unlocket dette endnu — vær den første!</span>'
+      : earners.map(v => `<span class="modal-earner-tag">${v.name}</span>`).join('');
+
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal(e) { if (e.target.id === 'modal-overlay') closeModalDirect(); }
+  function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('open'); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+  // ── VIEWER FILTER ──────────────────────────────────────────────
+  function filterViewer() {
+    const v = document.getElementById('vsearch').value.trim();
+    currentViewer = v || null;
+    buildGrid(currentViewer);
+  }
+
+  document.getElementById('vsearch').addEventListener('keydown', e => {
+    if (e.key === 'Enter') filterViewer();
+  });
+
+  // ── INIT ───────────────────────────────────────────────────────
+  loadData();
+</script>
+</body>
+</html>
