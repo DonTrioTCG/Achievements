@@ -365,29 +365,22 @@
       return;
     }
 
-    window.handleSheetData = function(data) {
-      if (!data || data.status !== 'ok') {
-        useDummyData();
-        return;
-      }
+    try {
+      const url = SHEET_URL + '?action=getAllData';
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.status !== 'ok') throw new Error('Bad response');
       allAchievements = data.achievements;
       allViewers = data.viewers;
       totalViewers = allViewers.length;
       renderAll();
-    };
-
-    const script = document.createElement('script');
-    script.src = SHEET_URL + '?action=getAllData&callback=handleSheetData';
-    script.onerror = () => useDummyData();
-    document.head.appendChild(script);
-
-    // Fallback if callback never fires after 8 seconds
-    setTimeout(() => {
-      if (document.getElementById('loading').style.display !== 'none') {
-        console.warn('Sheet fetch timed out, using dummy data');
-        useDummyData();
-      }
-    }, 15000);
+    } catch(err) {
+      console.error('Fetch failed:', err);
+      useDummyData();
+    }
   }
 
   // ── DUMMY DATA (used until URL is configured) ──────────────────
