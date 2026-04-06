@@ -514,8 +514,10 @@
     return title
       .toLowerCase()
       .replace(/[&!':]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim() + '.png';
+      .replace(/\s+/g, '-')
+      .trim()
+      .replace(/-+/g, '-')
+      .replace(/-$/, '') + '.png';
   }
 
   // State
