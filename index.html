@@ -386,7 +386,7 @@
   <button class="filter-btn"        id="f-earned"  onclick="setFilter('earned')">Dine Achievements</button>
   <button class="filter-btn"        id="f-missing" onclick="setFilter('missing')">Achievements du Mangler</button>
   <div class="filter-divider"></div>
-  <button class="filter-btn"        id="f-pins"    onclick="togglePinFilter()">📌 Kun med Pin</button>
+  <button class="filter-btn"        id="f-pins"    onclick="togglePinFilter()">🏅 Vind badges!</button>
   <div id="viewer-tag-wrap"></div>
 </div>
 
@@ -707,7 +707,7 @@
           <div class="ach-top">
             <span class="ach-icon">${icon}</span>
             <div class="ach-badges">
-              ${ach.hasPin ? '<span class="pin-indicator">📌 Pin</span>' : ''}
+              ${ach.hasPin ? '<span class="pin-indicator">🏅 Badge</span>' : ''}
               ${earned     ? '<span class="earned-badge">✓ Earned</span>' : ''}
             </div>
           </div>
