@@ -137,15 +137,13 @@
 
   /* ── FILTER BAR ── */
   #filter-bar{
-    display:none;
+    display:flex;
     background:var(--bg2);border-bottom:1px solid var(--border);
     padding:16px 40px;
     align-items:center;justify-content:center;
     gap:12px;flex-wrap:wrap;
     position:sticky;top:0;z-index:50;
   }
-
-  #filter-bar.visible{display:flex}
 
   .filter-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-right:4px}
 
@@ -161,7 +159,14 @@
   .filter-btn.active{background:rgba(227,0,11,0.2);border-color:var(--red);color:var(--red)}
   .filter-btn.pin-active{background:var(--pin-gold);border-color:var(--pin-border);color:var(--gold)}
 
+  /* Viewer-only buttons hidden until search */
+  .filter-btn.viewer-only{display:none}
+  .filter-btn.viewer-only.visible{display:inline-block}
+
   .filter-divider{width:1px;height:24px;background:var(--border)}
+  /* Hide divider before viewer buttons appear */
+  #filter-divider-viewer{display:none}
+  #filter-divider-viewer.visible{display:block}
 
   .viewer-tag{
     font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
@@ -379,12 +384,13 @@
   <div class="viewer-status" id="viewer-status"></div>
 </div>
 
-<!-- FILTER BAR (sticky, shown after search or scroll) -->
+<!-- FILTER BAR (always visible, viewer buttons shown after search) -->
 <div id="filter-bar">
   <span class="filter-label">Vis:</span>
   <button class="filter-btn active" id="f-all"     onclick="setFilter('all')">Alle</button>
-  <button class="filter-btn"        id="f-earned"  onclick="setFilter('earned')">Dine Achievements</button>
-  <button class="filter-btn"        id="f-missing" onclick="setFilter('missing')">Achievements du Mangler</button>
+  <div id="filter-divider-viewer" class="filter-divider"></div>
+  <button class="filter-btn viewer-only" id="f-earned"  onclick="setFilter('earned')">Dine Achievements</button>
+  <button class="filter-btn viewer-only" id="f-missing" onclick="setFilter('missing')">Achievements du Mangler</button>
   <div class="filter-divider"></div>
   <button class="filter-btn"        id="f-pins"    onclick="togglePinFilter()">🏅 Vind Pin Badges!</button>
   <div id="viewer-tag-wrap"></div>
@@ -727,6 +733,19 @@
     });
   }
 
+  // ── SHOW / HIDE VIEWER FILTER BUTTONS ─────────────────────────
+  function showViewerFilters() {
+    document.getElementById('f-earned').classList.add('visible');
+    document.getElementById('f-missing').classList.add('visible');
+    document.getElementById('filter-divider-viewer').classList.add('visible');
+  }
+
+  function hideViewerFilters() {
+    document.getElementById('f-earned').classList.remove('visible');
+    document.getElementById('f-missing').classList.remove('visible');
+    document.getElementById('filter-divider-viewer').classList.remove('visible');
+  }
+
   // ── SEARCH ─────────────────────────────────────────────────────
   function doSearch() {
     const val = document.getElementById('hero-input').value.trim();
@@ -737,10 +756,10 @@
       clearViewerTag();
       activeFilter = 'all';
       setFilterUI('all');
+      hideViewerFilters();
       renderCards();
       statusEl.textContent = '';
       statusEl.className = 'viewer-status';
-      document.getElementById('filter-bar').classList.remove('visible');
       return;
     }
 
@@ -751,10 +770,10 @@
       statusEl.textContent = '✓ ' + found.name + ' fundet — ' + found.earned.length + ' achievements earned';
       statusEl.className = 'viewer-status found';
       showViewerTag(found.name, found.earned.length);
+      showViewerFilters();
       activeFilter = 'all';
       setFilterUI('all');
       renderCards();
-      document.getElementById('filter-bar').classList.add('visible');
       // Scroll to achievements
       setTimeout(() => {
         document.getElementById('main-content').scrollIntoView({behavior:'smooth'});
@@ -762,9 +781,9 @@
     } else {
       currentViewer = null;
       clearViewerTag();
+      hideViewerFilters();
       statusEl.textContent = '✗ "' + val + '" blev ikke fundet — har du skrevet dit navn korrekt?';
       statusEl.className = 'viewer-status not-found';
-      document.getElementById('filter-bar').classList.remove('visible');
       renderCards();
     }
   }
@@ -791,7 +810,7 @@
     pinFilterOn = false;
     setFilterUI('all');
     document.getElementById('f-pins').classList.remove('pin-active');
-    document.getElementById('filter-bar').classList.remove('visible');
+    hideViewerFilters();
     renderCards();
   }
 
