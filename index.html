@@ -138,11 +138,18 @@
   /* ── FILTER BAR ── */
   #filter-bar{
     display:flex;
+    flex-direction:column;
     background:var(--bg2);border-bottom:1px solid var(--border);
-    padding:16px 40px;
+    padding:14px 40px;
+    position:sticky;top:0;z-index:50;
+    gap:10px;
+  }
+
+  .filter-row{
+    display:flex;
     align-items:center;justify-content:center;
     gap:12px;flex-wrap:wrap;
-    position:sticky;top:0;z-index:50;
+    width:100%;
   }
 
   .filter-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-right:4px}
@@ -152,18 +159,19 @@
     color:var(--muted);
     font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
     padding:7px 16px;cursor:pointer;transition:all .2s;
-    text-transform:uppercase;
+    text-transform:uppercase;white-space:nowrap;
   }
 
   .filter-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
   .filter-btn.active{background:rgba(227,0,11,0.2);border-color:var(--red);color:var(--red)}
   .filter-btn.pin-active{background:var(--pin-gold);border-color:var(--pin-border);color:var(--gold)}
+  .filter-btn.cat-active{background:rgba(227,0,11,0.15);border-color:var(--red);color:var(--text)}
 
   /* Viewer-only buttons hidden until search */
   .filter-btn.viewer-only{display:none}
   .filter-btn.viewer-only.visible{display:inline-block}
 
-  .filter-divider{width:1px;height:24px;background:var(--border)}
+  .filter-divider{width:1px;height:24px;background:var(--border);flex-shrink:0}
   /* Hide divider before viewer buttons appear */
   #filter-divider-viewer{display:none}
   #filter-divider-viewer.visible{display:block}
@@ -179,6 +187,46 @@
     background:none;border:none;color:var(--earned-text);
     cursor:pointer;font-size:14px;line-height:1;padding:0;
   }
+
+  /* ── ACHIEVEMENT SEARCH ROW ── */
+  .filter-search-row{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-top:1px solid rgba(255,255,255,0.05);
+    padding-top:10px;
+  }
+
+  .filter-search-label{
+    font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;
+    color:var(--muted);text-transform:uppercase;white-space:nowrap;flex-shrink:0;
+  }
+
+  #ach-search{
+    flex:1;
+    background:var(--bg3);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:'Rajdhani',sans-serif;
+    font-size:14px;font-weight:600;
+    padding:7px 14px;
+    outline:none;
+    transition:border-color .2s;
+  }
+
+  #ach-search:focus{border-color:rgba(227,0,11,0.6);}
+  #ach-search::placeholder{color:var(--muted);font-weight:400;font-size:13px}
+
+  .ach-search-clear{
+    background:none;border:1px solid var(--border);
+    color:var(--muted);cursor:pointer;
+    font-family:'Share Tech Mono',monospace;font-size:11px;
+    padding:7px 12px;transition:all .2s;
+    display:none;
+  }
+  .ach-search-clear.visible{display:block}
+  .ach-search-clear:hover{border-color:var(--red);color:var(--red)}
 
   /* ── LOADING ── */
   #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 40px;gap:20px}
@@ -331,14 +379,38 @@
   .modal-close:hover{border-color:var(--red);color:var(--red)}
 
   /* ── COMMUNAL ── */
-  .communal-card{background:var(--bg2);border:1px solid var(--border);padding:22px 26px;margin-bottom:14px}
-  .communal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:8px;flex-wrap:wrap}
-  .communal-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:3px}
-  .communal-desc{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:14px}
-  .communal-pct{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--red);line-height:1;white-space:nowrap}
+  .communal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:20px}
+
+  .communal-card{background:var(--bg2);border:1px solid var(--border);padding:22px 26px;position:relative;overflow:hidden;transition:border-color .2s}
+  .communal-card:hover{border-color:rgba(227,0,11,0.4)}
+  .communal-card.complete{border-color:rgba(245,197,24,0.5);background:linear-gradient(135deg,var(--bg2) 60%,rgba(40,30,0,0.6))}
+
+  .communal-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+  .communal-card-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+  .communal-card-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;flex:1}
+  .communal-card-pct{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--red);line-height:1;white-space:nowrap}
+  .communal-card.complete .communal-card-pct{color:var(--gold)}
+
+  .communal-tiers{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .communal-tier{
+    font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+    padding:3px 8px;border:1px solid var(--border);color:var(--muted);
+    text-transform:uppercase;white-space:nowrap;
+  }
+  .communal-tier.done{border-color:rgba(245,197,24,0.5);color:var(--gold);background:rgba(245,197,24,0.08)}
+  .communal-tier.active{border-color:var(--red);color:var(--text);background:rgba(227,0,11,0.1)}
+
+  .communal-desc{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:12px}
   .progress-bar{height:6px;background:rgba(255,255,255,0.06);overflow:hidden}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--red-dim),var(--red))}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--red-dim),var(--red));transition:width .6s ease}
+  .communal-card.complete .progress-fill{background:linear-gradient(90deg,#8a6000,var(--gold))}
   .progress-meta{display:flex;justify-content:space-between;margin-top:7px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px}
+
+  .communal-complete-badge{
+    font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+    color:var(--gold);background:rgba(245,197,24,0.1);border:1px solid rgba(245,197,24,0.4);
+    padding:3px 10px;text-transform:uppercase;display:inline-block;margin-bottom:10px;
+  }
 
   /* ── LAST UPDATED ── */
   .last-updated{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-align:center;margin-top:40px}
@@ -351,7 +423,8 @@
     .stats-bar{gap:24px;padding:20px}
     #hero-search{padding:40px 20px 50px}
     main{padding:30px 16px 100px}
-    #filter-bar{padding:12px 16px}
+    #filter-bar{padding:10px 16px}
+    .filter-search-row{flex-wrap:wrap}
   }
 </style>
 </head>
@@ -386,14 +459,31 @@
 
 <!-- FILTER BAR (always visible, viewer buttons shown after search) -->
 <div id="filter-bar">
-  <span class="filter-label">Vis:</span>
-  <button class="filter-btn active" id="f-all"     onclick="setFilter('all')">Alle</button>
-  <div id="filter-divider-viewer" class="filter-divider"></div>
-  <button class="filter-btn viewer-only" id="f-earned"  onclick="setFilter('earned')">Dine Achievements</button>
-  <button class="filter-btn viewer-only" id="f-missing" onclick="setFilter('missing')">Achievements du Mangler</button>
-  <div class="filter-divider"></div>
-  <button class="filter-btn"        id="f-pins"    onclick="togglePinFilter()">🏅 Vind Pin Badges!</button>
-  <div id="viewer-tag-wrap"></div>
+  <!-- Row 1: status/viewer filters + category filters + pin filter -->
+  <div class="filter-row">
+    <span class="filter-label">Vis:</span>
+    <button class="filter-btn active" id="f-all"     onclick="setFilter('all')">Alle</button>
+    <div id="filter-divider-viewer" class="filter-divider"></div>
+    <button class="filter-btn viewer-only" id="f-earned"  onclick="setFilter('earned')">Dine Achievements</button>
+    <button class="filter-btn viewer-only" id="f-missing" onclick="setFilter('missing')">Achievements du Mangler</button>
+    <div class="filter-divider"></div>
+    <span class="filter-label">Kategori:</span>
+    <button class="filter-btn" id="f-cat-Pack Hits"  onclick="setCategory('Pack Hits')">🎯 Pack Hits</button>
+    <button class="filter-btn" id="f-cat-PvP"        onclick="setCategory('PvP')">⚔️ PvP</button>
+    <button class="filter-btn" id="f-cat-Gym Leader" onclick="setCategory('Gym Leader')">🏅 Gym Leader</button>
+    <button class="filter-btn" id="f-cat-Sociale"    onclick="setCategory('Sociale')">🤝 Sociale</button>
+    <button class="filter-btn" id="f-cat-Other"      onclick="setCategory('Other')">⭐ Andre</button>
+    <button class="filter-btn" id="f-cat-Faelles"    onclick="setCategory('Faelles')">🤝 Fælles</button>
+    <div class="filter-divider"></div>
+    <button class="filter-btn" id="f-pins" onclick="togglePinFilter()">🏅 Vind Pin Badges!</button>
+    <div id="viewer-tag-wrap"></div>
+  </div>
+  <!-- Row 2: achievement text search -->
+  <div class="filter-search-row">
+    <span class="filter-search-label">Søg:</span>
+    <input id="ach-search" type="text" placeholder="Søg i achievements...">
+    <button class="ach-search-clear" id="ach-search-clear" onclick="clearAchSearch()">× Ryd</button>
+  </div>
 </div>
 
 <!-- LOADING -->
@@ -417,28 +507,13 @@
   <div id="categories-container"></div>
 
   <!-- Communal -->
-  <div class="section-header" id="communal-header">
-    <div><div class="section-title">Fælles Achievements</div></div>
-    <div class="section-line"></div>
-    <div class="section-tag">Communal</div>
-  </div>
-  <div class="communal-card">
-    <div class="communal-top"><div class="communal-name">🤝 Fælles Front</div><div class="communal-pct" id="cp1-pct">0%</div></div>
-    <div class="communal-desc">Chatten åbner tilsammen 100 packs på én måned</div>
-    <div class="progress-bar"><div class="progress-fill" id="cp1-bar" style="width:0%"></div></div>
-    <div class="progress-meta"><span id="cp1-meta">0 / 100 packs</span><span>Denne måned</span></div>
-  </div>
-  <div class="communal-card">
-    <div class="communal-top"><div class="communal-name">⚡ Holdet Samler</div><div class="communal-pct" id="cp2-pct">0%</div></div>
-    <div class="communal-desc">10 viewers rammer et EX-kort samme måned</div>
-    <div class="progress-bar"><div class="progress-fill" id="cp2-bar" style="width:0%"></div></div>
-    <div class="progress-meta"><span id="cp2-meta">0 / 10 viewers</span><span>Denne måned</span></div>
-  </div>
-  <div class="communal-card">
-    <div class="communal-top"><div class="communal-name">🏆 Ingen Tilbage</div><div class="communal-pct" id="cp3-pct">0%</div></div>
-    <div class="communal-desc">Alle aktive viewers tjener mindst ét achievement i en sæson</div>
-    <div class="progress-bar"><div class="progress-fill" id="cp3-bar" style="width:0%"></div></div>
-    <div class="progress-meta"><span id="cp3-meta">0 / 0 viewers</span><span>Denne sæson</span></div>
+  <div id="communal-section" class="category-section" data-category="Faelles">
+    <div class="section-header">
+      <div><div class="section-title">🤝 Fælles Achievements</div></div>
+      <div class="section-line"></div>
+      <div class="section-tag">Communal</div>
+    </div>
+    <div class="communal-grid" id="communal-grid"></div>
   </div>
 
   <div class="last-updated" id="last-updated"></div>
@@ -529,10 +604,13 @@
   // State
   let allAchievements = [];
   let allViewers = [];
+  let communalData = [];
   let currentViewer = null;
   let totalViewers = 0;
   let activeFilter = 'all';
   let pinFilterOn = false;
+  let activeCategory = null;
+  let achSearchQuery = '';
 
   // ── FETCH DATA ─────────────────────────────────────────────────
   async function loadData() {
@@ -544,6 +622,7 @@
       if (!data || data.status !== 'ok') { useDummyData(); return; }
       allAchievements = data.achievements;
       allViewers      = data.viewers;
+      communalData    = data.communal || [];
       totalViewers    = allViewers.length;
       renderAll();
     };
@@ -581,6 +660,32 @@
       {name:'GentlemanDon', bullseyes:0, tournaments:0, earned:[]},
       {name:'Dingodreng1',  bullseyes:0, tournaments:0, earned:[]},
     ];
+    communalData = [
+      {key:'packs_1000',              current:347,  goal:1000},
+      {key:'packs_5000',              current:347,  goal:5000},
+      {key:'packs_10000',             current:347,  goal:10000},
+      {key:'twitch_subs_50',          current:23,   goal:50},
+      {key:'twitch_subs_100',         current:23,   goal:100},
+      {key:'twitch_subs_250',         current:23,   goal:250},
+      {key:'twitch_followers_500',    current:412,  goal:500},
+      {key:'twitch_followers_2500',   current:412,  goal:2500},
+      {key:'twitch_followers_5000',   current:412,  goal:5000},
+      {key:'youtube_subs_1000',       current:88,   goal:1000},
+      {key:'youtube_subs_5000',       current:88,   goal:5000},
+      {key:'youtube_subs_10000',      current:88,   goal:10000},
+      {key:'tiktok_followers_1000',   current:210,  goal:1000},
+      {key:'tiktok_followers_5000',   current:210,  goal:5000},
+      {key:'tiktok_followers_10000',  current:210,  goal:10000},
+      {key:'discord_members_250',     current:67,   goal:250},
+      {key:'discord_members_500',     current:67,   goal:500},
+      {key:'discord_members_1000',    current:67,   goal:1000},
+      {key:'super_rare_50',           current:18,   goal:50},
+      {key:'super_rare_100',          current:18,   goal:100},
+      {key:'super_rare_250',          current:18,   goal:250},
+      {key:'gym_leaders_100',         current:34,   goal:100},
+      {key:'gym_leaders_500',         current:34,   goal:500},
+      {key:'gym_leaders_1000',        current:34,   goal:1000},
+    ];
     totalViewers = allViewers.length;
     renderAll();
   }
@@ -592,17 +697,12 @@
     const totalEarned = allViewers.reduce((s,v) => s + v.earned.length, 0);
     document.getElementById('s-earned').textContent  = totalEarned;
 
-    const viewersWithAch = allViewers.filter(v => v.earned.length > 0).length;
-    const pct3 = totalViewers > 0 ? Math.round(viewersWithAch/totalViewers*100) : 0;
-    document.getElementById('cp3-pct').textContent  = pct3 + '%';
-    document.getElementById('cp3-bar').style.width  = pct3 + '%';
-    document.getElementById('cp3-meta').textContent = viewersWithAch + ' / ' + totalViewers + ' viewers';
-
     document.getElementById('last-updated').textContent =
       'Sidst opdateret: ' + new Date().toLocaleDateString('da-DK',{day:'numeric',month:'long',year:'numeric'});
 
     buildLeaderboard();
     buildCategories();
+    buildCommunal();
 
     document.getElementById('loading').style.display    = 'none';
     document.getElementById('main-content').style.display = 'block';
@@ -629,6 +729,90 @@
         <div class="lb-count"><strong>${count}</strong><span>${count} / ${allAchievements.length}</span></div>
       </div>`;
     }).join('');
+  }
+
+  // ── BUILD COMMUNAL ─────────────────────────────────────────────
+  const COMMUNAL_CONFIG = {
+    packs:            { icon:'📦', label:'Packs Åbnet',                    unit:'packs' },
+    twitch_subs:      { icon:'⭐', label:'Twitch Subscribers',             unit:'subs' },
+    twitch_followers: { icon:'💜', label:'Twitch Følgere',                 unit:'følgere' },
+    youtube_subs:     { icon:'🔴', label:'YouTube Subscribers',            unit:'subs' },
+    tiktok_followers: { icon:'🎵', label:'TikTok Følgere',                 unit:'følgere' },
+    discord_members:  { icon:'🎮', label:'Discord Medlemmer',              unit:'medlemmer' },
+    super_rare:       { icon:'✨', label:'Super Rares Ramt (SIR eller over)', unit:'ramt' },
+    gym_leaders:      { icon:'🏅', label:'Gym Leaders Besejret',           unit:'besejret' },
+  };
+
+  function getGroupKey(key) {
+    // e.g. "twitch_followers_500" → "twitch_followers"
+    const parts = key.split('_');
+    // last part is always the number goal, so drop it
+    // but handle two-word prefixes like twitch_subs, twitch_followers, tiktok_followers, discord_members, super_rare, gym_leaders
+    parts.pop();
+    return parts.join('_');
+  }
+
+  function buildCommunal() {
+    const grid = document.getElementById('communal-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    // Group tiers by prefix
+    const groups = {};
+    communalData.forEach(row => {
+      const gk = getGroupKey(row.key);
+      if (!groups[gk]) groups[gk] = [];
+      groups[gk].push(row);
+    });
+
+    // Render in a fixed order matching COMMUNAL_CONFIG
+    Object.keys(COMMUNAL_CONFIG).forEach(gk => {
+      const tiers = groups[gk];
+      if (!tiers || tiers.length === 0) return;
+
+      // Sort tiers by goal ascending
+      tiers.sort((a,b) => a.goal - b.goal);
+
+      const cfg = COMMUNAL_CONFIG[gk];
+      const current = tiers[0].current; // all tiers share same current value
+
+      // Find active tier (first not yet complete)
+      let activeTierIdx = tiers.findIndex(t => current < t.goal);
+      const allDone = activeTierIdx === -1;
+      if (allDone) activeTierIdx = tiers.length - 1;
+
+      const activeTier = tiers[activeTierIdx];
+      const pct = allDone ? 100 : Math.min(100, Math.round(current / activeTier.goal * 100));
+
+      // Build tier pills
+      const tierPills = tiers.map((t, i) => {
+        let cls = 'communal-tier';
+        if (allDone || i < activeTierIdx) cls += ' done';
+        else if (i === activeTierIdx)     cls += ' active';
+        const label = allDone || i < activeTierIdx ? '✓ ' + t.goal.toLocaleString('da-DK') : t.goal.toLocaleString('da-DK');
+        return `<span class="${cls}">${label}</span>`;
+      }).join('');
+
+      const card = document.createElement('div');
+      card.className = 'communal-card' + (allDone ? ' complete' : '');
+
+      card.innerHTML = `
+        <div class="communal-card-top">
+          <span class="communal-card-icon">${cfg.icon}</span>
+          <div class="communal-card-title">${cfg.label}</div>
+          <div class="communal-card-pct">${pct}%</div>
+        </div>
+        <div class="communal-tiers">${tierPills}</div>
+        ${allDone ? '<div class="communal-complete-badge">🏆 Alle mål nået!</div>' : ''}
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-meta">
+          <span>${current.toLocaleString('da-DK')} / ${activeTier.goal.toLocaleString('da-DK')} ${cfg.unit}</span>
+          <span>${allDone ? 'Fuldt unlocket!' : activeTierIdx + 1 + ' / ' + tiers.length + ' tiers'}</span>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
   }
 
   // ── BUILD CATEGORIES ───────────────────────────────────────────
@@ -670,14 +854,31 @@
       ? allViewers.find(v => v.name.toLowerCase() === currentViewer.toLowerCase())
       : null;
 
+    const query = achSearchQuery.toLowerCase().trim();
+
+    // Show/hide communal section based on category filter
+    const communalSection = document.getElementById('communal-section');
+    if (communalSection) {
+      communalSection.style.display = (activeCategory === 'Faelles' || !activeCategory) ? '' : 'none';
+    }
+
+    // If Faelles-only filter is active, hide all individual category sections
     CATEGORY_ORDER.forEach(cat => {
       const gridId  = 'grid-' + cat.replace(/\s/g,'-');
       const emptyId = 'empty-' + cat.replace(/\s/g,'-');
       const countId = 'cat-count-' + cat.replace(/\s/g,'-');
+      const sectionEl = document.querySelector(`.category-section[data-category="${cat}"]`);
       const grid    = document.getElementById(gridId);
       const emptyEl = document.getElementById(emptyId);
       const countEl = document.getElementById(countId);
       if (!grid) return;
+
+      // Hide if Faelles-only or a different specific category is selected
+      if (activeCategory === 'Faelles' || (activeCategory && activeCategory !== cat)) {
+        if (sectionEl) sectionEl.style.display = 'none';
+        return;
+      }
+      if (sectionEl) sectionEl.style.display = '';
 
       const achs = allAchievements.filter(a => a.category === cat);
       let visibleCount = 0;
@@ -689,13 +890,13 @@
         const count   = earners.length;
         const pct     = totalViewers > 0 ? Math.round(count/totalViewers*100) : 0;
         const icon    = getIcon(ach.title);
-        const filename = titleToFilename(ach.title);
 
         // Filter logic
         let hide = false;
         if (activeFilter === 'earned'  && (!viewer || !earned)) hide = true;
         if (activeFilter === 'missing' && (!viewer || earned))  hide = true;
         if (pinFilterOn && !ach.hasPin) hide = true;
+        if (query && !ach.title.toLowerCase().includes(query) && !ach.desc.toLowerCase().includes(query)) hide = true;
 
         if (!hide) visibleCount++;
 
@@ -808,9 +1009,46 @@
     document.getElementById('viewer-status').className = 'viewer-status';
     activeFilter = 'all';
     pinFilterOn = false;
+    activeCategory = null;
+    achSearchQuery = '';
+    document.getElementById('ach-search').value = '';
+    document.getElementById('ach-search-clear').classList.remove('visible');
     setFilterUI('all');
     document.getElementById('f-pins').classList.remove('pin-active');
+    [...CATEGORY_ORDER, 'Faelles'].forEach(c => {
+      const btn = document.getElementById('f-cat-' + c);
+      if (btn) btn.classList.remove('cat-active');
+    });
     hideViewerFilters();
+    renderCards();
+  }
+
+  // ── CATEGORY FILTER ────────────────────────────────────────────
+  function setCategory(cat) {
+    if (activeCategory === cat) {
+      activeCategory = null;
+    } else {
+      activeCategory = cat;
+    }
+    const allCats = [...CATEGORY_ORDER, 'Faelles'];
+    allCats.forEach(c => {
+      const btn = document.getElementById('f-cat-' + c);
+      if (btn) btn.classList.toggle('cat-active', activeCategory === c);
+    });
+    renderCards();
+  }
+
+  // ── ACHIEVEMENT SEARCH ─────────────────────────────────────────
+  document.getElementById('ach-search').addEventListener('input', function() {
+    achSearchQuery = this.value;
+    document.getElementById('ach-search-clear').classList.toggle('visible', achSearchQuery.length > 0);
+    renderCards();
+  });
+
+  function clearAchSearch() {
+    achSearchQuery = '';
+    document.getElementById('ach-search').value = '';
+    document.getElementById('ach-search-clear').classList.remove('visible');
     renderCards();
   }
 
