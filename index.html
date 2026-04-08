@@ -757,13 +757,13 @@
         return a ? getIcon(a.title) : '🏆';
       }).join('');
     } else if (activeLbTab === 'bullseyes') {
-      const shuffled = [...allViewers].sort(() => Math.random() - 0.5);
+      const shuffled = [...allViewers].filter(v => v.bullseyes > 0).sort(() => Math.random() - 0.5);
       sorted   = shuffled.sort((a,b) => b.bullseyes - a.bullseyes).slice(0, ROWS);
       getCount = v => v.bullseyes;
       getSub   = v => v.bullseyes + ' bullseyes';
       getIcons = () => '🎯';
     } else {
-      const shuffled = [...allViewers].sort(() => Math.random() - 0.5);
+      const shuffled = [...allViewers].filter(v => v.tournaments > 0).sort(() => Math.random() - 0.5);
       sorted   = shuffled.sort((a,b) => b.tournaments - a.tournaments).slice(0, ROWS);
       getCount = v => v.tournaments;
       getSub   = v => v.tournaments + ' vundet';
