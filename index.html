@@ -236,6 +236,18 @@
   /* ── MAIN ── */
   main{max-width:1300px;margin:0 auto;padding:50px 24px 120px;display:none}
 
+  /* ── LEADERBOARD TABS ── */
+  .lb-tabs{display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border)}
+  .lb-tab{
+    flex:1;background:var(--bg3);color:var(--muted);
+    font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;
+    padding:10px 8px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+    border:none;border-right:1px solid var(--border);text-align:center;
+  }
+  .lb-tab:last-child{border-right:none}
+  .lb-tab:hover{color:var(--text);background:var(--bg2)}
+  .lb-tab.active{background:rgba(227,0,11,0.15);border-bottom:2px solid var(--red);color:var(--text)}
+
   /* ── LEADERBOARD ── */
   .leaderboard{display:flex;flex-direction:column;gap:10px;margin-bottom:60px}
   .lb-row{display:flex;align-items:center;gap:16px;background:var(--bg2);border:1px solid var(--border);padding:14px 20px;position:relative;overflow:hidden;transition:all .2s}
@@ -253,6 +265,7 @@
   .lb-badges{display:flex;gap:4px;position:relative;z-index:1;flex-wrap:wrap}
   .lb-badge{font-size:14px}
   .lb-count{position:relative;z-index:1;text-align:right;white-space:nowrap}
+  .lb-row.lb-empty{opacity:0.3;pointer-events:none}
   .lb-count strong{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--red);display:block;line-height:1}
   .lb-count span{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px}
 
@@ -501,6 +514,11 @@
     <div class="section-line"></div>
     <div class="section-tag">Leaderboard</div>
   </div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" id="lb-tab-achievements" onclick="setLbTab('achievements')">🏆 Achievement Points</button>
+    <button class="lb-tab" id="lb-tab-bullseyes"    onclick="setLbTab('bullseyes')">🎯 Bullseyes Ramt</button>
+    <button class="lb-tab" id="lb-tab-tournaments"  onclick="setLbTab('tournaments')">⚔️ Turneringer Vundet</button>
+  </div>
   <div class="leaderboard" id="leaderboard"></div>
 
   <!-- Achievement categories rendered dynamically -->
@@ -709,24 +727,72 @@
   }
 
   // ── LEADERBOARD ────────────────────────────────────────────────
-  function buildLeaderboard() {
-    const sorted = [...allViewers].sort((a,b) => b.earned.length - a.earned.length).slice(0,10);
-    const max    = sorted[0]?.earned.length || 1;
-    const medals = ['🥇','🥈','🥉'];
+  let activeLbTab = 'achievements';
 
-    document.getElementById('leaderboard').innerHTML = sorted.map((viewer, idx) => {
-      const count = viewer.earned.length;
-      const icons = viewer.earned.slice(0,5).map(col => {
+  function setLbTab(tab) {
+    activeLbTab = tab;
+    ['achievements','bullseyes','tournaments'].forEach(t => {
+      document.getElementById('lb-tab-' + t).classList.toggle('active', t === tab);
+    });
+    renderLeaderboard();
+  }
+
+  function buildLeaderboard() {
+    renderLeaderboard();
+  }
+
+  function renderLeaderboard() {
+    const medals = ['🥇','🥈','🥉'];
+    const ROWS = 10;
+    let sorted, getCount, getSub, getIcons;
+
+    if (activeLbTab === 'achievements') {
+      // Shuffle first to randomise ties, then sort descending
+      const shuffled = [...allViewers].sort(() => Math.random() - 0.5);
+      sorted   = shuffled.sort((a,b) => b.earned.length - a.earned.length).slice(0, ROWS);
+      getCount = v => v.earned.length;
+      getSub   = v => v.earned.length + ' / ' + allAchievements.length;
+      getIcons = v => v.earned.slice(0,5).map(col => {
         const a = allAchievements.find(x => x.col === col);
         return a ? getIcon(a.title) : '🏆';
       }).join('');
+    } else if (activeLbTab === 'bullseyes') {
+      const shuffled = [...allViewers].sort(() => Math.random() - 0.5);
+      sorted   = shuffled.sort((a,b) => b.bullseyes - a.bullseyes).slice(0, ROWS);
+      getCount = v => v.bullseyes;
+      getSub   = v => v.bullseyes + ' bullseyes';
+      getIcons = () => '🎯';
+    } else {
+      const shuffled = [...allViewers].sort(() => Math.random() - 0.5);
+      sorted   = shuffled.sort((a,b) => b.tournaments - a.tournaments).slice(0, ROWS);
+      getCount = v => v.tournaments;
+      getSub   = v => v.tournaments + ' vundet';
+      getIcons = () => '⚔️';
+    }
+
+    // Pad to always have exactly ROWS rows so height stays fixed
+    while (sorted.length < ROWS) sorted.push(null);
+
+    const max = getCount(sorted.find(v => v !== null) || {earned:[], bullseyes:0, tournaments:0}) || 1;
+
+    document.getElementById('leaderboard').innerHTML = sorted.map((viewer, idx) => {
+      if (!viewer) {
+        // Empty placeholder row — same height, just blank
+        return `<div class="lb-row lb-empty">
+          <div class="lb-rank" style="color:var(--border)">#${idx+1}</div>
+          <div class="lb-name" style="color:var(--border);font-size:14px;letter-spacing:1px">—</div>
+          <div class="lb-badges"></div>
+          <div class="lb-count"><strong style="color:var(--border)">—</strong></div>
+        </div>`;
+      }
+      const count = getCount(viewer);
       const cls = idx===0?'top-1':idx===1?'top-2':idx===2?'top-3':'';
       return `<div class="lb-row ${cls}">
         <div class="lb-bar" style="width:${count/max*100}%"></div>
         <div class="lb-rank">${idx<3?medals[idx]:'#'+(idx+1)}</div>
         <div class="lb-name">${viewer.name}</div>
-        <div class="lb-badges">${icons}</div>
-        <div class="lb-count"><strong>${count}</strong><span>${count} / ${allAchievements.length}</span></div>
+        <div class="lb-badges">${getIcons(viewer)}</div>
+        <div class="lb-count"><strong>${count}</strong><span>${getSub(viewer)}</span></div>
       </div>`;
     }).join('');
   }
